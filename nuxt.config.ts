@@ -196,6 +196,10 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   content: {
+    database: {
+      type: 'd1',
+      bindingName: 'DB'
+    },
     experimental: {
       sqliteConnector: 'better-sqlite3'
     }
