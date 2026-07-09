@@ -6,6 +6,8 @@
 
 This repository is the open-source starter: a production-ready Nuxt site with the gitbase admin console, Nuxt Content, and Cloudflare Pages deployment baked in. Clone it, connect your repo and secrets, and ship.
 
+![gitbase admin console](https://r2.gitbase.cloud/gitbase-demo/simple-block.jpg)
+
 ## Features
 
 - **Git-native** — Every CMS save becomes a GitHub commit. Content is versioned alongside your code.
@@ -33,6 +35,7 @@ This repository is the open-source starter: a production-ready Nuxt site with th
 git clone git@github.com:codebind-io/gitbase-nuxt.git
 cd gitbase-nuxt
 pnpm install
+cp .env.example .env
 pnpm dev
 ```
 
