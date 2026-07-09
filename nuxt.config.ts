@@ -197,7 +197,7 @@ export default defineNuxtConfig({
 
   content: {
     experimental: {
-      sqliteConnector: 'native'
+      sqliteConnector: 'better-sqlite3'
     }
   },
 
@@ -226,7 +226,7 @@ export default defineNuxtConfig({
       sourcemap: false
     },
     optimizeDeps: {
-      include: []
+      include: ['tailwindcss/colors']
     }
   },
 
