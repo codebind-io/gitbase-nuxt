@@ -1,0 +1,164 @@
+---
+description: Sveltia CMS — config, backends, collections, fields, and admin setup for this Nuxt project
+globs: ["public/admin/**/*", "content/**/*"]
+alwaysApply: false
+---
+
+# Sveltia CMS
+
+Sveltia CMS is a Git-based, file-backed admin UI (successor to Netlify CMS / Decap CMS). Configuration is usually a public YAML file next to the admin `index.html`.
+
+- Main docs: https://sveltiacms.app/en/docs/
+- Configuration basics (formats, config URL, schema, security): https://sveltiacms.app/en/docs/config-basics
+- AI-oriented full docs index: https://sveltiacms.app/llms.txt — detailed bundle: https://sveltiacms.app/llms-full.txt
+
+## Project setup (this repo)
+
+- Admin UI: `public/admin/index.html` (loads `@sveltia/cms` from unpkg)
+- Config file: `public/admin/config.yml` (default location; no `<link rel="cms-config-url">` required unless you move or split config)
+- Content folders (as in config): `/content/pages`, `/content/posts`
+- Media: `/public/media` with `public_folder: /media` (adjust `repo` and paths when wiring GitHub)
+
+## Configuration file
+
+- Default: `config.yml` beside `index.html`, served e.g. at `/admin/config.yml`.
+- **Public by design** — never put API keys, tokens, or passwords in the YAML.
+- **YAML / TOML / JSON** supported; YAML is the usual choice for comments and readability. For TOML or JSON, add a `<link href="..." type="application/toml|application/json" rel="cms-config-url" />` in `<head>` per [Configuration Basics](https://sveltiacms.app/en/docs/config-basics).
+- **Multiple files**: several `<link rel="cms-config-url">` tags merge in order; YAML anchors/aliases only work within a single file (merged objects are deep-merged).
+- **Editor validation**: use the official JSON Schema at the top of `config.yml`:
+
+```yaml
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+```
+
+- **Runtime**: invalid config surfaces on the CMS login screen; prefer schema in the editor for complete feedback.
+
+## Config layout (root structure)
+
+Typical top-level keys (exact set depends on backends and media mode):
+
+```yaml
+backend:
+  name: github # or gitlab, gitea, test — see Backends docs
+  repo: org/repo
+  branch: main # optional
+
+# Option A — media committed in Git (classic Netlify-style)
+media_folder: public/media
+public_folder: /media
+
+# Option B — Cloudflare R2 (browser uploads; see R2 section below)
+# media_libraries: { ... }
+
+collections: [] # entry collections and/or file collections
+
+singletons: [] # optional; root-level list, NOT inside collections
+```
+
+Docs: [Collections overview](https://sveltiacms.app/en/docs/collections), [Media](https://sveltiacms.app/en/docs/media).
+
+### Entry collection (folder of files)
+
+Former Netlify/Decap “folder collection”: many entries, usually one file per entry under `folder`.
+
+```yaml
+collections:
+  - name: posts
+    label: Posts
+    label_singular: Post
+    folder: content/posts # repo-root-relative; leading / optional per docs examples
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md # optional; default often md + YAML front matter
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: date, label: Date, widget: datetime }
+      - { name: body, label: Body, widget: richtext }
+```
+
+- Required: `name`, `folder`, `fields`.
+- Common: `label`, `label_singular`, `description`, `create`, `slug`, `extension`, `format`, nested `fields` / widgets.
+
+Full options: [Entry collections](https://sveltiacms.app/en/docs/collections/entries).
+
+### File collection (fixed files, no create/delete)
+
+Group of predefined paths; editors change content, not the file list.
+
+```yaml
+collections:
+  - name: pages
+    label: Pages
+    files:
+      - name: about
+        label: About page
+        file: content/pages/about.md
+        format: yaml-frontmatter # optional; often inferred from extension
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: body, label: Body, widget: richtext }
+```
+
+- Collection-level: `name`, `files` (array).
+- Per file: `name`, `file`, `fields`; optional `label`, `format`.
+
+Details: [File collections](https://sveltiacms.app/en/docs/collections/files).
+
+### Singletons (one-off files at root)
+
+Declared as a **root** `singletons` array (not nested under `collections`). One logical document per `file` path.
+
+```yaml
+singletons:
+  - name: settings
+    label: Site settings
+    file: content/settings.yaml
+    fields:
+      - { name: site_title, label: Site title, widget: string }
+      - { name: tagline, label: Tagline, widget: text }
+```
+
+Details: [Singletons](https://sveltiacms.app/en/docs/collections/singletons).
+
+### Cloudflare R2 (media library)
+
+S3-compatible uploads from the browser; configure under `media_libraries.cloudflare_r2`. **Do not** put the Secret Access Key in YAML — users enter it in the CMS UI (stored in browser); only `access_key_id` and non-secret bucket/account/public URL belong in config.
+
+```yaml
+media_libraries:
+  cloudflare_r2:
+    access_key_id: "<64-char R2 token id>"
+    bucket: my-r2-bucket
+    account_id: "<cloudflare account id>"
+    public_url: https://pub-xxxx.r2.dev # or https://media.example.com
+    prefix: cms-uploads/ # optional key prefix in bucket
+    jurisdiction: default # optional: default | eu | fedramp
+```
+
+- `public_url` is required for previews (R2 S3 API is always authenticated).
+- R2 bucket **CORS** must allow your CMS origin with `GET`, `PUT`, `HEAD` and the Sig v4 headers the app sends.
+- If the site uses **CSP**, allow the R2 API host and `public_url` host per [Cloudflare R2](https://sveltiacms.app/en/docs/media/cloudflare-r2) and [Security / CSP](https://sveltiacms.app/en/docs/security#setting-up-content-security-policy).
+
+Full guide: [Cloudflare R2](https://sveltiacms.app/en/docs/media/cloudflare-r2).
+
+## Concepts (map to docs)
+
+| Topic | Docs area |
+|-------|-----------|
+| Backend (GitHub, GitLab, Gitea, test) | https://sveltiacms.app/en/docs/ — Backends |
+| Media storage (internal, S3, R2, …) | [Media](https://sveltiacms.app/en/docs/media), [R2](https://sveltiacms.app/en/docs/media/cloudflare-r2) |
+| Entry collections (`folder`) | [Entry collections](https://sveltiacms.app/en/docs/collections/entries) |
+| File collections (`files`) | [File collections](https://sveltiacms.app/en/docs/collections/files) |
+| Singletons (root `singletons`) | [Singletons](https://sveltiacms.app/en/docs/collections/singletons) |
+| Field widgets (`string`, `markdown`, `image`, `relation`, …) | [Fields](https://sveltiacms.app/en/docs/fields) |
+
+Netlify/Decap-style keys (`backend`, `media_folder`, `public_folder`, `collections`, `folder`, `fields`, `widget`) remain familiar; confirm behavior and new options in the Sveltia docs for each feature.
+
+## Nuxt / content repo notes
+
+- Paths in `config.yml` should match how the CMS and your framework resolve files in the repo (this project uses `/content/...` and `/public/media` in `config.yml`); keep `folder` / `media_folder` aligned with Nuxt Content and static asset paths.
+- After changing collections or front matter shape, keep Nuxt Content (`content.config.ts`, queries, page types) in sync with the CMS schema.
+
+## Customization
+
+Preview styles/templates, custom components, manual JS/TS init, and event hooks are documented under **Customizing Sveltia CMS** on the same doc site.

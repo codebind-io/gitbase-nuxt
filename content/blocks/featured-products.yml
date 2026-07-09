@@ -1,0 +1,6 @@
+visible: false
+columns_visible:
+  mobile: 1
+  tablet: 3
+  desktop: 3
+cover_image: true

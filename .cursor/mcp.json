@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "nuxt": {
+      "type": "http",
+      "url": "https://nuxt.com/mcp"
+    },
+    "nuxt-ui": {
+      "type": "http",
+      "url": "https://ui.nuxt.com/mcp"
+    },
+    "nuxt-content": {
+      "type": "http",
+      "url": "https://content.nuxt.com/mcp"
+    },
+    "nuxt-i18n": {
+      "type": "http",
+      "url": "https://i18n.nuxt.com/mcp"
+    },
+    "cloudflare-docs": {
+      "url": "https://docs.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-workers-bindings": {
+      "url": "https://bindings.mcp.cloudflare.com/mcp"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+site:
+  logo_light: ''
+  logo_dark: ''
+  favicon: ''
+shop:
+  currency_symbol: €
+theme:
+  dark_mode: true
+  primary: orange
+  custom_color: ''
+  primary_dark: lime
+  custom_color_dark: ''
+  neutral: mauve
+  radius: 0.25
+  font: public-sans
+seo:
+  title: GitBase Demo | A modern content-driven website boilerplate
+  description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. A flexible demo site powered by GitBase CMS and Nuxt.
+  og_image: https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&h=630&fit=crop
+  og_title: GitBase Demo | A modern content-driven website boilerplate
+  og_description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. A flexible demo site powered by GitBase CMS and Nuxt.
+  keywords:
+    - demo
+    - boilerplate
+    - gitbase
+    - nuxt
+navbar:
+  hide_on_scroll: true
+  show_darkmode_switch: true
+  nav_items:
+    - label: Home
+      to: /
+    - label: Blog
+      to: /posts
+    - label: Store
+      to: /products
+  cta:
+    label: Get Gitbase
+    url: https://gitbase.cloud
+footer:
+  links:
+    - label: Contact
+      to: /contact
+    - label: Terms and Conditions
+      to: /terms
+    - label: Privacy Policy
+      to: /privacy
+social:
+  facebook: ''
+  instagram: ''
+  x: ''
+  whatsapp: ''

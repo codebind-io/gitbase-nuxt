@@ -1,0 +1,7 @@
+visible: true
+title: Scalable CMS
+description: Edit content, media, and site settings in a visual Console
+image: https://r2.gitbase.cloud/gitbase-demo/simple-block.jpg
+layout:
+  desktop: top
+  mobile: first

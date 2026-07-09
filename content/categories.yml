@@ -1,0 +1,18 @@
+shop_categories:
+  - title: Speakers
+    slug: speakers
+    description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    icon: lucide:cpu
+  - title: Headphones
+    slug: headphones
+    description: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    icon: lucide:shopping-bag
+blog_categories:
+  - title: AI
+    slug: ai
+    description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    icon: lucide:brain
+  - title: Design
+    slug: design
+    description: Excepteur sint occaecat cupidatat non proident sunt in culpa.
+    icon: lucide:palette

@@ -1,0 +1,391 @@
+logo:
+  src: /admin/icon.svg
+  show_in_header: true
+
+app_title: Gitbase console
+
+ai-agent:
+  show: true
+
+editor:
+  preview: false
+
+backend:
+  name: github
+  repo: owner/repo
+  branch: main
+  skip_ci: true
+  auth_methods:
+    - token
+
+slug:
+  clean_accents: true
+
+collections:
+  - name: pages
+    label: Pages
+    label_singular: Page
+    folder: content/pages
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Body, name: body, widget: richtext, required: false }
+
+  - name: products
+    label: Products
+    label_singular: Product
+    folder: content/products
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Status
+        name: status
+        widget: select
+        default: draft
+        options:
+          - { label: Draft, value: draft }
+          - { label: Online, value: online }
+      - { label: Description, name: description, widget: text, required: false }
+      - { label: Date, name: date, widget: datetime, type: date, required: false }
+      - { label: Image, name: image, widget: image, required: false }
+      - { label: Checkout link, name: checkout_url, widget: string, required: false }
+      - label: Category
+        name: category
+        widget: relation
+        collection: _singletons
+        file: categories
+        value_field: '{{shop_categories.*.slug}}'
+        display_fields: ['{{shop_categories.*.title}}']
+        search_fields: ['{{shop_categories.*.title}}', '{{shop_categories.*.slug}}']
+        required: false
+      - label: SEO Tags
+        name: tags
+        widget: list
+        required: false
+        collapsed: true
+        field: { label: Tag, widget: string }
+      - { label: Body, name: body, widget: richtext, required: false }
+      - { label: Featured, name: featured, widget: boolean, required: false, hint: Show in the featured products section. }
+
+  - name: posts
+    label: Posts
+    label_singular: Post
+    folder: content/posts
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Status
+        name: status
+        widget: select
+        default: draft
+        options:
+          - { label: Draft, value: draft }
+          - { label: Online, value: online }
+      - { label: Description, name: description, widget: text, required: false }
+      - { label: Date, name: date, widget: datetime, type: date, required: false }
+      - { label: Image, name: image, widget: image, required: false }
+      - label: Category
+        name: category
+        widget: relation
+        collection: _singletons
+        file: categories
+        value_field: '{{blog_categories.*.slug}}'
+        display_fields: ['{{blog_categories.*.title}}']
+        search_fields: ['{{blog_categories.*.title}}', '{{blog_categories.*.slug}}']
+        required: false
+      - label: SEO Tags
+        name: tags
+        widget: list
+        required: false
+        collapsed: true
+        field: { label: Tag, widget: string }
+      - { label: Body, name: body, widget: richtext, required: false }
+
+  - name: modules
+    label: Modules
+    files:
+      - name: simple_block
+        label: Simple Block
+        file: /content/blocks/simple-block.yml
+        fields:
+          - { label: Show on homepage, name: visible, widget: boolean, default: true }
+          - { label: Title, name: title, widget: string }
+          - { label: Description, name: description, widget: text }
+          - { label: Image, name: image, widget: image, required: false }
+          - label: Layout
+            name: layout
+            widget: object
+            collapsed: true
+            fields:
+              - label: Image position (desktop)
+                name: desktop
+                widget: select
+                default: left
+                options:
+                  - { label: Left, value: left }
+                  - { label: Right, value: right }
+                  - { label: Top, value: top }
+                  - { label: Bottom, value: bottom }
+              - label: Image order (mobile)
+                name: mobile
+                widget: select
+                default: first
+                options:
+                  - { label: First (above text), value: first }
+                  - { label: Second (below text), value: second }
+
+      - name: simple_hero
+        label: Simple Hero
+        file: /content/blocks/simple-hero.yml
+        fields:
+          - { label: Show on homepage, name: visible, widget: boolean, default: true }
+          - { label: Title, name: title, widget: string }
+          - { label: Description, name: description, widget: text }
+          - label: CTA
+            name: cta
+            widget: object
+            required: false
+            collapsed: true
+            fields:
+              - { label: Label, name: label, widget: string, required: false }
+              - { label: URL, name: url, widget: string, required: false, hint: Internal path or full URL. }
+              - label: Style
+                name: style
+                widget: select
+                default: plain
+                options:
+                  - { label: Plain, value: plain }
+                  - { label: Outline, value: outline }
+          - label: CTA 2
+            name: cta2
+            widget: object
+            required: false
+            collapsed: true
+            fields:
+              - { label: Label, name: label, widget: string, required: false }
+              - { label: URL, name: url, widget: string, required: false }
+              - label: Style
+                name: style
+                widget: select
+                default: outline
+                options:
+                  - { label: Plain, value: plain }
+                  - { label: Outline, value: outline }
+
+      - name: carousel
+        label: Carousel
+        file: /content/blocks/carousel.yml
+        fields:
+          - { label: Show on homepage, name: visible, widget: boolean, default: true }
+          - label: Visible columns
+            name: columns_visible
+            widget: object
+            fields:
+              - { label: Mobile columns, name: mobile, widget: number, default: 1, value_type: int, min: 1, max: 6 }
+              - { label: Tablet columns, name: tablet, widget: number, default: 2, value_type: int, min: 1, max: 6 }
+              - { label: Desktop columns, name: desktop, widget: number, default: 3, value_type: int, min: 1, max: 6 }
+          - { label: Cover image, name: cover_image, widget: boolean, default: false, hint: Crop images to a square frame when enabled. }
+          - label: Images
+            name: images
+            label_singular: Image
+            widget: list
+            required: false
+            fields:
+              - { label: Image, name: image, widget: image, required: true }
+              - { label: Alt text, name: alt, widget: string, required: false, hint: Short description for accessibility. }
+
+      - name: featured_products
+        label: Featured Products
+        file: /content/blocks/featured-products.yml
+        fields:
+          - { label: Show on homepage, name: visible, widget: boolean, default: true }
+          - label: Visible columns
+            name: columns_visible
+            widget: object
+            fields:
+              - { label: Mobile columns, name: mobile, widget: number, default: 1, value_type: int, min: 1, max: 6 }
+              - { label: Tablet columns, name: tablet, widget: number, default: 2, value_type: int, min: 1, max: 6 }
+              - { label: Desktop columns, name: desktop, widget: number, default: 3, value_type: int, min: 1, max: 6 }
+          - { label: Cover image, name: cover_image, widget: boolean, default: false, hint: Crop images to a square frame when enabled. }
+
+      - name: featured_posts
+        label: Featured Posts
+        file: /content/blocks/featured-posts.yml
+        fields:
+          - { label: Show on homepage, name: visible, widget: boolean, default: true }
+          - label: Featured post
+            name: featured
+            widget: relation
+            collection: posts
+            display_fields: [title]
+            required: true
+
+      - name: quick_contact
+        label: Quick contact
+        file: /content/blocks/quick-contact.yml
+        fields:
+          - label: Show button
+            name: show_on
+            widget: select
+            default: mobile
+            options:
+              - { label: Hide, value: hide }
+              - { label: Mobile only, value: mobile }
+              - { label: Mobile + tablet, value: mobile_tablet }
+              - { label: Mobile + tablet + desktop, value: all }
+          - label: Show on
+            name: show_pages
+            widget: select
+            default: homepage
+            options:
+              - { label: Homepage only, value: homepage }
+              - { label: Website, value: website }
+          - { label: WhatsApp, name: whatsapp, widget: string, required: false, hint: "International format, e.g. +15555550100" }
+          - { label: Phone, name: phone, widget: string, required: false, hint: "International format, e.g. +15555550100" }
+          - { label: Email, name: email, widget: string, required: false }
+          - { label: Maps / itinerary URL, name: maps_url, widget: string, required: false }
+
+singletons:
+  - name: settings
+    label: Settings
+    file: /content/settings.yml
+    fields:
+      - label: Site
+        name: site
+        widget: object
+        fields:
+          - { label: Logo (light mode), name: logo_light, widget: image, required: false }
+          - { label: Logo (dark mode), name: logo_dark, widget: image, required: false }
+          - { label: Favicon, name: favicon, widget: image, required: false }
+      - label: Shop
+        name: shop
+        widget: object
+        collapsed: true
+        fields:
+          - { label: Currency symbol, name: currency_symbol, widget: string, default: € }
+      - label: Theme
+        name: theme
+        widget: object
+        collapsed: true
+        fields:
+          - { label: Default dark mode, name: dark_mode, widget: boolean, default: true }
+          - label: Primary
+            name: primary
+            widget: select
+            default: blue
+            options: [red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose, custom-color]
+          - { label: Custom color, name: custom_color, widget: string, required: false, hint: Hex color when primary is set to custom-color. }
+          - label: Primary (dark mode)
+            name: primary_dark
+            widget: select
+            required: false
+            hint: Optional. Leave empty to reuse the light mode primary.
+            options: [red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose, custom-color]
+          - { label: Custom color (dark mode), name: custom_color_dark, widget: string, required: false, hint: Hex color when primary (dark mode) is set to custom-color. }
+          - label: Neutral
+            name: neutral
+            widget: select
+            default: neutral
+            options: [slate, gray, zinc, neutral, stone, taupe, mauve, mist, olive]
+          - label: Radius
+            name: radius
+            widget: select
+            default: 0.25
+            options:
+              - { label: "0", value: 0 }
+              - { label: "0.125", value: 0.125 }
+              - { label: "0.25", value: 0.25 }
+              - { label: "0.375", value: 0.375 }
+              - { label: "0.5", value: 0.5 }
+          - label: Font
+            name: font
+            widget: select
+            default: public-sans
+            options: [public-sans, dm-sans, geist, inter, poppins, outfit, raleway]
+      - label: SEO
+        name: seo
+        widget: object
+        collapsed: true
+        fields:
+          - { label: Title, name: title, widget: string, required: false }
+          - { label: Description, name: description, widget: text, required: false }
+          - { label: OG Image, name: og_image, widget: image, required: false }
+          - { label: OG Title, name: og_title, widget: string, required: false }
+          - { label: OG Description, name: og_description, widget: text, required: false }
+          - label: Keywords
+            name: keywords
+            widget: list
+            required: false
+            field: { label: Keyword, widget: string }
+      - label: Navbar
+        name: navbar
+        widget: object
+        fields:
+          - { label: Hide navbar on scroll, name: hide_on_scroll, widget: boolean, default: false }
+          - { label: Show dark mode switch, name: show_darkmode_switch, widget: boolean, default: true }
+          - label: Navigation links
+            name: nav_items
+            widget: list
+            collapsed: true
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: Link, name: to, widget: string, hint: "Internal path or anchor, e.g. /contact or #section-id" }
+          - label: CTA button
+            name: cta
+            widget: object
+            collapsed: true
+            fields:
+              - { label: Label, name: label, widget: string, required: false, default: Contact }
+              - { label: URL, name: url, widget: string, required: false, hint: Internal path or full URL. }
+      - label: Footer menu
+        name: footer
+        widget: object
+        collapsed: true
+        fields:
+          - label: Links
+            name: links
+            widget: list
+            collapsed: true
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: Link, name: to, widget: string }
+      - label: Social links
+        name: social
+        widget: object
+        collapsed: true
+        fields:
+          - { label: Facebook, name: facebook, widget: string, required: false }
+          - { label: Instagram, name: instagram, widget: string, required: false }
+          - { label: X (Twitter), name: x, widget: string, required: false }
+          - { label: WhatsApp, name: whatsapp, widget: string, required: false }
+
+  - name: categories
+    label: Categories
+    file: /content/categories.yml
+    fields:
+      - label: Products categories
+        name: shop_categories
+        label_singular: Product category
+        widget: list
+        collapsed: true
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Slug, name: slug, widget: string }
+          - { label: Description, name: description, widget: text, required: false }
+          - { label: Icon, name: icon, widget: string, required: false, hint: "Enter i-lucide-icon-name (e.g. i-lucide-shopping-bag). Browse icons at https://lucide.dev/icons/" }
+      - label: Posts categories
+        name: blog_categories
+        label_singular: Post category
+        widget: list
+        collapsed: true
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Slug, name: slug, widget: string }
+          - { label: Description, name: description, widget: text, required: false }
+          - { label: Icon, name: icon, widget: string, required: false, hint: "Enter i-lucide-icon-name (e.g. i-lucide-shopping-bag). Browse icons at https://lucide.dev/icons/" }
