@@ -52,6 +52,7 @@ Copy [`.env.example`](.env.example) to `.env` and fill in the `GITBASE_*` values
 | `GITBASE_CODEBASE_URL` | gitbase admin script URL (default provided) |
 | `GITBASE_SITE_URL` | Public site URL (e.g. `http://localhost:3000` locally) |
 | `GITBASE_GITHUB_REPO` | `owner/repo` for content commits |
+| `GITBASE_GITHUB_BRANCH` | Git branch for CMS commits (default: `main`; e.g. `dev`) |
 | `GITBASE_GITHUB_PAT` | GitHub personal access token (repo scope) |
 | `GITBASE_GOOGLE_CLIENT_ID` | Google OAuth client ID for admin login |
 | `GITBASE_ALLOWED_EMAILS` | Comma-separated emails allowed to sign in |

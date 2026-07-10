@@ -46,6 +46,10 @@ function buildAdminConfigYaml(base: string, config: GitbaseEnv) {
     yaml = yaml.replace(/^(\s*repo:\s*).+$/m, `$1${config.githubRepo.trim()}`)
   }
 
+  if (config.githubBranch.trim()) {
+    yaml = yaml.replace(/^(\s*branch:\s*).+$/m, `$1${config.githubBranch.trim()}`)
+  }
+
   if (config.siteUrl.trim()) {
     const site = config.siteUrl.replace(/\/$/, '')
     yaml = yaml.replace(/^(\s*#?\s*site_url:\s*).+$/m, `$1${site}`)
@@ -406,7 +410,7 @@ export async function handleGitbaseAdminRoute(event: H3Event, slug: string) {
 
     const baseRef = typeof body?.base_ref === 'string' && body.base_ref.trim()
       ? body.base_ref.trim()
-      : 'main'
+      : (config.githubBranch.trim() || 'main')
     const createPullRequest = body?.create_pull_request === true
     const { response, data } = await proxyGithubAgentRequest(
       `/agents/repos/${owner}/${name}/tasks`,

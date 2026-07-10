@@ -15,6 +15,7 @@ export function getGitbaseEnv() {
     codebaseUrl: readEnv('GITBASE_CODEBASE_URL'),
     siteUrl: readEnv('GITBASE_SITE_URL'),
     githubRepo: readEnv('GITBASE_GITHUB_REPO'),
+    githubBranch: readEnv('GITBASE_GITHUB_BRANCH', 'main'),
     githubPat: readEnv('GITBASE_GITHUB_PAT'),
     deployHookUrl: readEnv('GITBASE_DEPLOY_HOOK_URL'),
     googleClientId: readEnv('GITBASE_GOOGLE_CLIENT_ID'),

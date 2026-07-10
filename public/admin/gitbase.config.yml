@@ -13,6 +13,7 @@ editor:
 backend:
   name: github
   repo: owner/repo
+  # Overridden at runtime by GITBASE_GITHUB_BRANCH (default: main)
   branch: main
   skip_ci: true
   auth_methods:
