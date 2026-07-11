@@ -196,10 +196,11 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   content: {
-    database: {
-      type: 'd1',
-      bindingName: 'DB'
-    },
+    // Cloudflare Pages: uncomment and bind a D1 database named `DB` in the dashboard.
+    // database: {
+    //   type: 'd1',
+    //   bindingName: 'DB'
+    // },
     experimental: {
       sqliteConnector: 'better-sqlite3'
     }
