@@ -1,6 +1,6 @@
 ---
 description: Sveltia CMS — config, backends, collections, fields, and admin setup for this Nuxt project
-globs: ["public/admin/**/*", "content/**/*"]
+globs: ["gitbase.config.yml", "content/**/*"]
 alwaysApply: false
 ---
 
@@ -14,10 +14,10 @@ Sveltia CMS is a Git-based, file-backed admin UI (successor to Netlify CMS / Dec
 
 ## Project setup (this repo)
 
-- Admin UI: `public/admin/index.html` (loads `@sveltia/cms` from unpkg)
-- Config file: `public/admin/config.yml` (default location; no `<link rel="cms-config-url">` required unless you move or split config)
-- Content folders (as in config): `/content/pages`, `/content/posts`
-- Media: `/public/media` with `public_folder: /media` (adjust `repo` and paths when wiring GitHub)
+- Admin UI: `/admin` (Nitro serves HTML + `@gitbase/cms` script)
+- Config file: `gitbase.config.yml` at repo root (served at `/admin/config.yml` with env merged)
+- Logo: `/favicon.svg`
+- Content folders (as in config): `/content/pages`, `/content/posts`, etc.
 
 ## Configuration file
 
@@ -28,7 +28,7 @@ Sveltia CMS is a Git-based, file-backed admin UI (successor to Netlify CMS / Dec
 - **Editor validation**: use the official JSON Schema at the top of `config.yml`:
 
 ```yaml
-# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+# yaml-language-server: $schema=https://unpkg.com/@gitbase/cms/schema/gitbase-cms.json
 ```
 
 - **Runtime**: invalid config surfaces on the CMS login screen; prefer schema in the editor for complete feedback.

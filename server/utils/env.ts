@@ -12,7 +12,6 @@ function parseAllowedEmails(raw: string) {
 
 export function getGitbaseEnv() {
   return {
-    codebaseUrl: readEnv('GITBASE_CODEBASE_URL'),
     siteUrl: readEnv('GITBASE_SITE_URL'),
     githubRepo: readEnv('GITBASE_GITHUB_REPO'),
     githubBranch: readEnv('GITBASE_GITHUB_BRANCH', 'main'),

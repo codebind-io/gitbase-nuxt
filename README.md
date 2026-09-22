@@ -25,7 +25,7 @@ This repository is the open-source starter: a production-ready Nuxt site with th
 | Framework | [Nuxt 4](https://nuxt.com/) + [Nitro](https://nitro.unjs.io/) |
 | UI | [Nuxt UI 4](https://ui.nuxt.com/) + Tailwind CSS 4 |
 | Content | [Nuxt Content 3](https://content.nuxt.com/) |
-| CMS | [gitbase](https://gitbase.cloud/) (Sveltia CMS–based console) |
+| CMS | [`@gitbase/cms`](https://www.npmjs.com/package/@gitbase/cms) (Sveltia CMS–based console) |
 | Hosting | [Cloudflare Pages](https://pages.cloudflare.com/) |
 | Media | Cloudflare R2 (optional) |
 
@@ -39,6 +39,8 @@ cp .env.example .env
 pnpm dev
 ```
 
+The admin UI comes from the `@gitbase/cms` dependency (served at `/admin/gitbase-cms.js`).
+
 Open [http://localhost:3000](http://localhost:3000) for the site and [http://localhost:3000/admin](http://localhost:3000/admin) for the CMS.
 
 ## Configuration
@@ -49,7 +51,6 @@ Copy [`.env.example`](.env.example) to `.env` and fill in the `GITBASE_*` values
 
 | Variable | Purpose |
 |----------|---------|
-| `GITBASE_CODEBASE_URL` | gitbase admin script URL (default provided) |
 | `GITBASE_SITE_URL` | Public site URL (e.g. `http://localhost:3000` locally) |
 | `GITBASE_GITHUB_REPO` | `owner/repo` for content commits |
 | `GITBASE_GITHUB_BRANCH` | Git branch for CMS commits (default: `main`; e.g. `dev`) |
@@ -67,7 +68,7 @@ npx wrangler pages secret bulk .env.cloudflare --project-name YOUR_PROJECT
 
 ### 2. CMS collections
 
-Edit [`public/admin/gitbase.config.yml`](public/admin/gitbase.config.yml) to match your content model. This file defines collections (pages, posts, products, homepage blocks) and singletons (settings, categories). It is served at `/admin/config.yml` with env values merged at runtime.
+Edit [`gitbase.config.yml`](gitbase.config.yml) to match your content model. This file defines collections (pages, posts, products, homepage blocks) and singletons (settings, categories). It is served at `/admin/config.yml` with env values merged at runtime.
 
 In local dev, config edits apply after a CMS refresh — no server restart needed. Production requires a redeploy.
 
@@ -94,8 +95,8 @@ pnpm build   # outputs to dist/
 │   ├── pages/              # Static pages
 │   ├── posts/              # Blog posts
 │   └── products/           # Product catalog
-├── public/admin/           # CMS config & assets
-│   └── gitbase.config.yml  # Collection schema
+├── public/                 # Static assets (favicon, etc.)
+├── gitbase.config.yml      # CMS collection schema
 ├── server/
 │   ├── routes/admin/       # Admin catch-all route
 │   └── utils/              # Auth, publish, env helpers
@@ -106,7 +107,7 @@ pnpm build   # outputs to dist/
 
 | File | Role |
 |------|------|
-| [`public/admin/gitbase.config.yml`](public/admin/gitbase.config.yml) | CMS collections and fields (no secrets) |
+| [`gitbase.config.yml`](gitbase.config.yml) | CMS collections and fields (no secrets) |
 | [`server/utils/env.ts`](server/utils/env.ts) | Reads `GITBASE_*` environment variables |
 | [`server/utils/gitbase.ts`](server/utils/gitbase.ts) | Admin routes, Google auth, publish hook |
 | [`server/routes/admin/[...slug].ts`](server/routes/admin/[...slug].ts) | Catch-all `/admin/*` handler |

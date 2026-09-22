@@ -1,5 +1,5 @@
 logo:
-  src: /admin/icon.svg
+  src: /favicon.svg
   show_in_header: true
 
 app_title: Gitbase console

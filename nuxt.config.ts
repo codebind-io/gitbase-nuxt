@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const gitbaseConfigPath = join(process.cwd(), 'public/admin/gitbase.config.yml')
+const gitbaseConfigPath = join(process.cwd(), 'gitbase.config.yml')
 
 const CF_MAX_RULE_LENGTH = 100
 const CF_MAX_RULES = 100
@@ -111,12 +111,8 @@ function fixCloudflareRoutes(distDir = join(process.cwd(), 'dist')) {
 
   const excludes = new Set(CF_ASSET_EXCLUDES)
 
-  // /admin/index.html and /admin/config.yml must hit the worker (env injection).
-  // Only icon.svg is served as a static asset from public/admin/.
-  const adminIcon = join(distDir, 'admin', 'icon.svg')
-  if (existsSync(adminIcon)) {
-    excludes.add('/admin/icon.svg')
-  }
+  // /admin/* hits the worker (config injection, CMS script, auth).
+  // Static public assets (e.g. /favicon.svg) are excluded via the root walk below.
 
   let hasRootSql = false
 
@@ -177,6 +173,14 @@ function fixCloudflareRoutes(distDir = join(process.cwd(), 'dist')) {
   console.log(`[fix-cloudflare-routes] Wrote ${exclude.length} exclude rules.`)
 }
 
+function contentSqliteConnector(): 'better-sqlite3' | 'native' {
+  const major = Number(process.versions.node.split('.')[0])
+
+  // better-sqlite3 12 aborts on Node 24+ when a Statement is finalized.
+  // Older Node keeps that connector. node:sqlite is available from 22.5.
+  return major >= 24 ? 'native' : 'better-sqlite3'
+}
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -202,7 +206,7 @@ export default defineNuxtConfig({
     //   bindingName: 'DB'
     // },
     experimental: {
-      sqliteConnector: 'better-sqlite3'
+      sqliteConnector: contentSqliteConnector()
     }
   },
 
@@ -215,6 +219,13 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'cloudflare_pages',
     sourceMap: false,
+    // Bundle CMS IIFE from npm so /admin/gitbase-cms.js works on Cloudflare Workers
+    serverAssets: [
+      {
+        baseName: 'gitbase-cms',
+        dir: 'node_modules/@gitbase/cms/dist'
+      }
+    ],
     rollupConfig: {
       plugins: [gitbaseConfigPlugin()]
     },

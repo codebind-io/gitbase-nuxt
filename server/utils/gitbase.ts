@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { join } from 'node:path'
 
 import type { H3Event } from 'h3'
@@ -7,8 +8,40 @@ import type { H3Event } from 'h3'
 import baseConfigYaml from 'virtual:gitbase-config'
 
 import { getGitbaseEnv, type GitbaseEnv } from './env'
+import { localFsClientScript } from './local-fs-client'
+import { handleLocalFs, localProjectName } from './local-fs'
 
-const gitbaseConfigSourcePath = join(process.cwd(), 'public/admin/gitbase.config.yml')
+const gitbaseConfigSourcePath = join(process.cwd(), 'gitbase.config.yml')
+const require = createRequire(import.meta.url)
+
+function resolveCmsBundlePath() {
+  try {
+    return require.resolve('@gitbase/cms/gitbase-cms.js')
+  } catch {
+    return null
+  }
+}
+
+async function readCmsBundle() {
+  try {
+    const storage = useStorage('assets:gitbase-cms')
+    const raw = await storage.getItemRaw('gitbase-cms.js')
+
+    if (raw != null) {
+      return typeof raw === 'string' ? raw : new TextDecoder().decode(raw as Uint8Array)
+    }
+  } catch {
+    // Dev / Node: fall through to filesystem resolve from the npm package
+  }
+
+  const bundlePath = resolveCmsBundlePath()
+
+  if (!bundlePath || !existsSync(bundlePath)) {
+    return null
+  }
+
+  return readFileSync(bundlePath, 'utf-8')
+}
 
 const GOOGLE_TOKEN_INFO_URL = 'https://oauth2.googleapis.com/tokeninfo'
 
@@ -212,12 +245,12 @@ function loadBaseConfig() {
     try {
       return readFileSync(gitbaseConfigSourcePath, 'utf-8')
     } catch {
-      throw createError({ statusCode: 500, statusMessage: 'public/admin/gitbase.config.yml is missing' })
+      throw createError({ statusCode: 500, statusMessage: 'gitbase.config.yml is missing' })
     }
   }
 
   if (!baseConfigYaml.trim()) {
-    throw createError({ statusCode: 500, statusMessage: 'public/admin/gitbase.config.yml is missing' })
+    throw createError({ statusCode: 500, statusMessage: 'gitbase.config.yml is missing' })
   }
 
   return baseConfigYaml
@@ -229,7 +262,11 @@ function getPublishHookUrl(event: H3Event, config: GitbaseEnv) {
   return `${origin}/admin/cms/publish`
 }
 
-function renderAdminHtml(cmsUrl: string) {
+function renderAdminHtml() {
+  const localFsScript = import.meta.dev
+    ? '\n    <script src="/admin/local-fs.js"></script>'
+    : ''
+
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -238,8 +275,8 @@ function renderAdminHtml(cmsUrl: string) {
     <link rel="cms-config-url" href="/admin/config.yml" type="application/yaml" />
     <title>GitBase CMS</title>
   </head>
-  <body>
-    <script src=${JSON.stringify(cmsUrl)}></script>
+  <body>${localFsScript}
+    <script src="/admin/gitbase-cms.js"></script>
   </body>
 </html>`
 }
@@ -325,12 +362,36 @@ export async function handleGitbaseAdminRoute(event: H3Event, slug: string) {
   const config = getGitbaseEnv()
   const method = getMethod(event)
   const path = slug.replace(/\/$/, '')
-  const cmsUrl = config.codebaseUrl.trim()
+
+  if (import.meta.dev && path === 'local-fs.js' && method === 'GET') {
+    setHeader(event, 'content-type', 'application/javascript; charset=utf-8')
+    setHeader(event, 'cache-control', 'no-store')
+    return localFsClientScript(localProjectName())
+  }
+
+  if (import.meta.dev && path === 'cms/fs' && method === 'POST') {
+    return handleLocalFs(event)
+  }
 
   if (path === 'index.html' && method === 'GET') {
     setHeader(event, 'content-type', 'text/html; charset=utf-8')
     setHeader(event, 'cache-control', 'no-store')
-    return renderAdminHtml(cmsUrl)
+    return renderAdminHtml()
+  }
+
+  if (path === 'gitbase-cms.js' && method === 'GET') {
+    const bundle = await readCmsBundle()
+
+    if (!bundle) {
+      throw createError({
+        statusCode: 503,
+        statusMessage: '@gitbase/cms bundle missing — run pnpm add @gitbase/cms'
+      })
+    }
+
+    setHeader(event, 'content-type', 'application/javascript; charset=utf-8')
+    setHeader(event, 'cache-control', 'public, max-age=3600')
+    return bundle
   }
 
   if (path === 'config.yml' && method === 'GET') {
