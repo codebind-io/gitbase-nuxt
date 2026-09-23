@@ -1,15 +1,13 @@
 <script setup lang="ts">
 const route = useRoute()
-const { data: page } = await useAsyncData(route.path, () => queryOnlinePosts().path(route.path).first())
+const { data: page } = await useAsyncData(route.path, () => queryOnlinePosts({ path: route.path, first: true }))
 if (!page.value) throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 
 const { data: categories } = await usePostCategories()
 const categoryLabel = computed(() => categoryTitle(categories.value, page.value!.category))
 
 const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
-  queryCollectionItemSurroundings('posts', route.path, {
-    fields: ['description']
-  }).where('status', '=', 'online')
+  queryOnlinePostSurround(route.path)
 )
 
 const title = page.value?.seo?.title || page.value?.title

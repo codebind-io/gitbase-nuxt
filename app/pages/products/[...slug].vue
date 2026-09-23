@@ -3,7 +3,7 @@ const route = useRoute()
 const { formatPrice } = useFormatPrice()
 
 const [{ data: product }, { data: categories }] = await Promise.all([
-  useAsyncData(route.path, () => queryOnlineProducts().path(route.path).first()),
+  useAsyncData(route.path, () => queryOnlineProducts({ path: route.path, first: true })),
   useShopCategories()
 ])
 
@@ -13,7 +13,7 @@ const { data: relatedProducts } = await useAsyncData(
     const category = product.value?.category
     if (!category) return []
 
-    const items = await queryOnlineProducts().where('category', '=', category).order('title', 'ASC').all()
+    const items = await queryOnlineProducts({ category, order: { field: 'title', direction: 'ASC' } })
 
     return items.filter(item => item.path !== route.path && item.category === category)
   }

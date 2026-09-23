@@ -3,7 +3,7 @@ const title = 'Posts'
 const description = 'Latest news and updates.'
 
 const [{ data: posts }, { data: categories }] = await Promise.all([
-  useAsyncData('posts-index', () => queryOnlinePosts().order('date', 'DESC').all()),
+  useAsyncData('posts-index', () => queryOnlinePosts({ order: { field: 'date', direction: 'DESC' } })),
   usePostCategories()
 ])
 

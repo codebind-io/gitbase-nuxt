@@ -1,5 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const gitbaseConfigPath = join(process.cwd(), 'gitbase.config.yml')
 
@@ -46,50 +48,9 @@ function gitbaseConfigPlugin() {
   }
 }
 
-function markdownRoutes(contentDir: string, segment: string) {
-  const dir = join(contentDir, segment)
-
-  if (!existsSync(dir)) {
-    return []
-  }
-
-  return readdirSync(dir)
-    .filter(file => file.endsWith('.md'))
-    .map(file => `/${segment}/${file.slice(0, -3).toLowerCase()}`)
-}
-
-function pageRoutes(contentDir: string) {
-  const dir = join(contentDir, 'pages')
-
-  if (!existsSync(dir)) {
-    return []
-  }
-
-  return readdirSync(dir)
-    .filter(file => file.endsWith('.md'))
-    .map(file => `/${file.slice(0, -3)}`)
-}
-
-function categoryRoutes(yaml: string, sectionKey: string, prefix: string) {
-  const section = yaml.split(`${sectionKey}:`)[1]?.split(/\n\w/)[0] ?? ''
-
-  return [...section.matchAll(/^\s+slug:\s+(\S+)/gm)].map(([, slug]) => `${prefix}/${slug}`)
-}
-
-function getPrerenderRoutes(rootDir = process.cwd()) {
-  const contentDir = join(rootDir, 'content')
-  const categoriesYaml = readFileSync(join(contentDir, 'categories.yml'), 'utf8')
-
-  return [
-    '/',
-    '/posts',
-    '/products',
-    ...pageRoutes(contentDir),
-    ...markdownRoutes(contentDir, 'posts'),
-    ...markdownRoutes(contentDir, 'products'),
-    ...categoryRoutes(categoriesYaml, 'shop_categories', '/products/category'),
-    ...categoryRoutes(categoriesYaml, 'blog_categories', '/posts/category')
-  ]
+function resolveInstalled(packageName: string, specifier: string) {
+  const entry = fileURLToPath(import.meta.resolve(packageName))
+  return createRequire(entry).resolve(specifier)
 }
 
 function toCloudflareRoutePath(fileName: string) {
@@ -199,19 +160,27 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  alias: {
+    'minimark/hast': resolveInstalled('@nuxt/content', 'minimark/hast'),
+    'remark-mdc': resolveInstalled('@nuxtjs/mdc/runtime', 'remark-mdc')
+  },
+
   content: {
-    // Cloudflare Pages: uncomment and bind a D1 database named `DB` in the dashboard.
-    // database: {
-    //   type: 'd1',
-    //   bindingName: 'DB'
-    // },
+    database: {
+      type: 'd1',
+      bindingName: 'DB'
+    },
     experimental: {
       sqliteConnector: contentSqliteConnector()
     }
   },
 
   routeRules: {
-    '/admin': { redirect: '/admin/index.html' }
+    '/admin': { redirect: '/admin/index.html' },
+    '/**': {
+      cache: false,
+      headers: { 'cache-control': 'no-store' }
+    }
   },
 
   compatibilityDate: '2024-11-01',
@@ -230,8 +199,8 @@ export default defineNuxtConfig({
       plugins: [gitbaseConfigPlugin()]
     },
     prerender: {
-      crawlLinks: true,
-      routes: ['/'],
+      crawlLinks: false,
+      routes: [],
       autoSubfolderIndex: false,
       ignore: ['/api/**', '/__nuxt_content/**', '/admin/**']
     }
@@ -242,16 +211,11 @@ export default defineNuxtConfig({
       sourcemap: false
     },
     optimizeDeps: {
-      include: ['tailwindcss/colors']
+      include: ['minimark/hast', 'tailwindcss/colors']
     }
   },
 
   hooks: {
-    'prerender:routes'(ctx) {
-      for (const route of getPrerenderRoutes()) {
-        ctx.routes.add(route)
-      }
-    },
     close() {
       fixCloudflareRoutes()
     }

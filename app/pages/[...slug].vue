@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PagesCollectionItem } from '@nuxt/content'
 import { computed } from 'vue'
-import { createError, defineOgImage, queryCollection, useAsyncData, useRoute, useSeoMeta } from '#imports'
+import { createError, defineOgImage, useAsyncData, useRoute, useSeoMeta } from '#imports'
 
 definePageMeta({
   validate(route) {
@@ -18,7 +18,7 @@ definePageMeta({
 const route = useRoute()
 
 const { data: page } = await useAsyncData<PagesCollectionItem | null>(`page-${route.path}`, () =>
-  queryCollection('pages').path(route.path).first()
+  queryContent<PagesCollectionItem | null>({ collection: 'pages', path: route.path, first: true })
 )
 
 if (!page.value) {

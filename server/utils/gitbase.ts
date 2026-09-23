@@ -7,6 +7,7 @@ import type { H3Event } from 'h3'
 // @ts-expect-error Inlined at build time by nitro rollup plugin in nuxt.config.ts
 import baseConfigYaml from 'virtual:gitbase-config'
 
+import { readContentDatabase, syncContentChanges } from './content-d1'
 import { getGitbaseEnv, type GitbaseEnv } from './env'
 import { localFsClientScript } from './local-fs-client'
 import { handleLocalFs, localProjectName } from './local-fs'
@@ -534,6 +535,46 @@ export async function handleGitbaseAdminRoute(event: H3Event, slug: string) {
     setResponseStatus(event, response.status)
 
     return data
+  }
+
+  if (path === 'cms/content' && (method === 'POST' || method === 'OPTIONS')) {
+    if (method === 'OPTIONS') {
+      setHeader(event, 'access-control-allow-origin', getRequestURL(event).origin)
+      setHeader(event, 'access-control-allow-methods', 'POST, OPTIONS')
+      setHeader(event, 'access-control-allow-headers', 'Authorization, Content-Type')
+      setResponseStatus(event, 204)
+      return null
+    }
+
+    if (import.meta.dev) {
+      return { ok: true, skipped: true }
+    }
+
+    await requireCmsAuth(event, config)
+
+    const database = readContentDatabase(event)
+
+    if (!database) {
+      throw createError({ statusCode: 503, statusMessage: 'D1 binding DB is not configured' })
+    }
+
+    const body = await readBody(event)
+    const changes = Array.isArray(body?.changes) ? body.changes : null
+
+    if (!changes) {
+      throw createError({ statusCode: 400, statusMessage: 'Missing content changes' })
+    }
+
+    try {
+      await syncContentChanges(database, changes)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Content sync failed'
+      throw createError({ statusCode: 400, statusMessage: message })
+    }
+
+    setHeader(event, 'access-control-allow-origin', getRequestURL(event).origin)
+
+    return { ok: true }
   }
 
   if (path === 'cms/publish' && (method === 'POST' || method === 'OPTIONS')) {

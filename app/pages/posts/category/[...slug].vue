@@ -6,7 +6,7 @@ const [{ data: category }, { data: categories }, { data: posts }] = await Promis
   usePostCategoryBySlug(categoryPath),
   usePostCategories(),
   useAsyncData(`posts-${categoryPath}`, () =>
-    queryOnlinePosts().where('category', '=', categoryPath).order('date', 'DESC').all()
+    queryOnlinePosts({ category: categoryPath, order: { field: 'date', direction: 'DESC' } })
   )
 ])
 

@@ -4,7 +4,7 @@ const description = 'Advanced wellbeing technologies from Organotest — quantum
 
 const [{ data: categories }, { data: products }] = await Promise.all([
   useShopCategories(),
-  useAsyncData('products-list', () => queryOnlineProducts().order('title', 'ASC').all())
+  useAsyncData('products-list', () => queryOnlineProducts({ order: { field: 'title', direction: 'ASC' } }))
 ])
 
 useSeoMeta({

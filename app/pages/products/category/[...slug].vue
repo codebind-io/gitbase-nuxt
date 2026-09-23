@@ -6,7 +6,7 @@ const [{ data: category }, { data: categories }, { data: products }] = await Pro
   useShopCategoryBySlug(categoryPath),
   useShopCategories(),
   useAsyncData(`products-${categoryPath}`, () =>
-    queryOnlineProducts().where('category', '=', categoryPath).order('title', 'ASC').all()
+    queryOnlineProducts({ category: categoryPath, order: { field: 'title', direction: 'ASC' } })
   )
 ])
 

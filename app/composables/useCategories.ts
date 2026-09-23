@@ -9,7 +9,7 @@ export function resolveCategoryPath(slug: string | string[] | undefined): string
 }
 
 async function loadCategories() {
-  return queryCollection('categories').first()
+  return queryContent<CategoriesCollectionItem | null>({ collection: 'categories', first: true })
 }
 
 export function useShopCategories() {

@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import type { SettingsCollectionItem } from '@nuxt/content'
+import type {
+  BlockCarouselCollectionItem,
+  BlockFeaturedPostsCollectionItem,
+  BlockFeaturedProductsCollectionItem,
+  BlockSimpleBlockCollectionItem,
+  BlockSimpleHeroCollectionItem,
+  SettingsCollectionItem
+} from '@nuxt/content'
 
 const [
   { data: simpleHero },
@@ -11,13 +18,16 @@ const [
   { data: posts },
   { data: postCategories }
 ] = await Promise.all([
-  useAsyncData('block-simple-hero', () => queryCollection('blockSimpleHero').first()),
-  useAsyncData('block-simple-block', () => queryCollection('blockSimpleBlock').first()),
-  useAsyncData('block-carousel', () => queryCollection('blockCarousel').first()),
-  useAsyncData('block-featured-products', () => queryCollection('blockFeaturedProducts').first()),
-  useAsyncData('featured-products', () => queryOnlineProducts().where('featured', '=', true).order('title', 'ASC').all()),
-  useAsyncData('block-featured-posts', () => queryCollection('blockFeaturedPosts').first()),
-  useAsyncData('posts', () => queryOnlinePosts().order('date', 'DESC').all()),
+  useAsyncData('block-simple-hero', () => queryContent<BlockSimpleHeroCollectionItem | null>({ collection: 'blockSimpleHero', first: true })),
+  useAsyncData('block-simple-block', () => queryContent<BlockSimpleBlockCollectionItem | null>({ collection: 'blockSimpleBlock', first: true })),
+  useAsyncData('block-carousel', () => queryContent<BlockCarouselCollectionItem | null>({ collection: 'blockCarousel', first: true })),
+  useAsyncData('block-featured-products', () => queryContent<BlockFeaturedProductsCollectionItem | null>({ collection: 'blockFeaturedProducts', first: true })),
+  useAsyncData('featured-products', () => queryOnlineProducts({
+    featured: true,
+    order: { field: 'title', direction: 'ASC' }
+  })),
+  useAsyncData('block-featured-posts', () => queryContent<BlockFeaturedPostsCollectionItem | null>({ collection: 'blockFeaturedPosts', first: true })),
+  useAsyncData('posts', () => queryOnlinePosts({ order: { field: 'date', direction: 'DESC' } })),
   usePostCategories()
 ])
 
