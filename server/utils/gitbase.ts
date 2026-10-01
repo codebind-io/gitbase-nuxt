@@ -23,13 +23,30 @@ function resolveCmsBundlePath() {
   }
 }
 
+function decodeCmsBundle(value: unknown) {
+  if (typeof value === 'string' && value.length > 0) {
+    return value
+  }
+
+  if (value instanceof Uint8Array) {
+    return new TextDecoder().decode(value)
+  }
+
+  if (value instanceof ArrayBuffer) {
+    return new TextDecoder().decode(new Uint8Array(value))
+  }
+
+  return null
+}
+
 async function readCmsBundle() {
   try {
     const storage = useStorage('assets:gitbase-cms')
-    const raw = await storage.getItemRaw('gitbase-cms.js')
+    const fromItem = decodeCmsBundle(await storage.getItem('gitbase-cms.js'))
+      ?? decodeCmsBundle(await storage.getItemRaw('gitbase-cms.js'))
 
-    if (raw != null) {
-      return typeof raw === 'string' ? raw : new TextDecoder().decode(raw as Uint8Array)
+    if (fromItem) {
+      return fromItem
     }
   } catch {
     // Dev / Node: fall through to filesystem resolve from the npm package

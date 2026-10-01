@@ -1,6 +1,6 @@
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const gitbaseConfigPath = join(process.cwd(), 'gitbase.config.yml')
@@ -62,6 +62,23 @@ function toCloudflareRoutePath(fileName: string) {
   return `/${fileName}`
 }
 
+function publishCmsScript(distDir = join(process.cwd(), 'dist')) {
+  if (!existsSync(distDir)) {
+    return
+  }
+
+  const source = join(dirname(fileURLToPath(import.meta.resolve('@gitbase/cms'))), 'gitbase-cms.js')
+
+  if (!existsSync(source)) {
+    console.warn('[gitbase-cms] Bundle not found, skipping static publish.')
+    return
+  }
+
+  const destDir = join(distDir, 'admin')
+  mkdirSync(destDir, { recursive: true })
+  copyFileSync(source, join(destDir, 'gitbase-cms.js'))
+}
+
 function fixCloudflareRoutes(distDir = join(process.cwd(), 'dist')) {
   const routesPath = join(distDir, '_routes.json')
 
@@ -72,8 +89,8 @@ function fixCloudflareRoutes(distDir = join(process.cwd(), 'dist')) {
 
   const excludes = new Set(CF_ASSET_EXCLUDES)
 
-  // /admin/* hits the worker (config injection, CMS script, auth).
-  // Static public assets (e.g. /favicon.svg) are excluded via the root walk below.
+  // The CMS bundle is a static file. The rest of /admin/* stays on the worker.
+  excludes.add('/admin/gitbase-cms.js')
 
   let hasRootSql = false
 
@@ -120,6 +137,11 @@ function fixCloudflareRoutes(distDir = join(process.cwd(), 'dist')) {
     .filter(rule => rule.length <= CF_MAX_RULE_LENGTH)
     .sort((a, b) => a.localeCompare(b))
     .slice(0, CF_MAX_RULES - 1)
+
+  if (!exclude.includes('/admin/gitbase-cms.js')) {
+    exclude.unshift('/admin/gitbase-cms.js')
+    exclude.length = Math.min(exclude.length, CF_MAX_RULES - 1)
+  }
 
   writeFileSync(
     routesPath,
@@ -192,7 +214,8 @@ export default defineNuxtConfig({
     serverAssets: [
       {
         baseName: 'gitbase-cms',
-        dir: 'node_modules/@gitbase/cms/dist'
+        dir: 'node_modules/@gitbase/cms/dist',
+        pattern: 'gitbase-cms.js'
       }
     ],
     rollupConfig: {
@@ -217,6 +240,7 @@ export default defineNuxtConfig({
 
   hooks: {
     close() {
+      publishCmsScript()
       fixCloudflareRoutes()
     }
   },
