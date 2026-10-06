@@ -3,6 +3,8 @@ import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { resolveCmsBundlePath } from './server/utils/cms-bundle-path'
+
 const gitbaseConfigPath = join(process.cwd(), 'gitbase.config.yml')
 
 const CF_MAX_RULE_LENGTH = 100
@@ -67,9 +69,9 @@ function publishCmsScript(distDir = join(process.cwd(), 'dist')) {
     return
   }
 
-  const source = join(dirname(fileURLToPath(import.meta.resolve('@gitbase/cms'))), 'gitbase-cms.js')
+  const source = resolveCmsBundlePath()
 
-  if (!existsSync(source)) {
+  if (!source || !existsSync(source)) {
     console.warn('[gitbase-cms] Bundle not found, skipping static publish.')
     return
   }
@@ -214,7 +216,7 @@ export default defineNuxtConfig({
     serverAssets: [
       {
         baseName: 'gitbase-cms',
-        dir: 'node_modules/@gitbase/cms/dist',
+        dir: dirname(resolveCmsBundlePath() || join(process.cwd(), 'node_modules/@gitbase/cms/dist/gitbase-cms.js')),
         pattern: 'gitbase-cms.js'
       }
     ],

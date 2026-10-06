@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
 import { join } from 'node:path'
 
 import type { H3Event } from 'h3'
@@ -7,21 +6,22 @@ import type { H3Event } from 'h3'
 // @ts-expect-error Inlined at build time by nitro rollup plugin in nuxt.config.ts
 import baseConfigYaml from 'virtual:gitbase-config'
 
+import { isLocalCmsBundle, resolveCmsBundlePath } from './cms-bundle-path'
+import {
+  addCmsMember,
+  isCmsMember,
+  isMemberEmail,
+  listCmsMembers,
+  normalizeMemberEmail,
+  getMembersDatabase,
+  removeCmsMember
+} from './cms-members'
 import { readContentDatabase, syncContentChanges } from './content-d1'
 import { getGitbaseEnv, type GitbaseEnv } from './env'
 import { localFsClientScript } from './local-fs-client'
 import { handleLocalFs, localProjectName } from './local-fs'
 
 const gitbaseConfigSourcePath = join(process.cwd(), 'gitbase.config.yml')
-const require = createRequire(import.meta.url)
-
-function resolveCmsBundlePath() {
-  try {
-    return require.resolve('@gitbase/cms/gitbase-cms.js')
-  } catch {
-    return null
-  }
-}
 
 function decodeCmsBundle(value: unknown) {
   if (typeof value === 'string' && value.length > 0) {
@@ -40,6 +40,12 @@ function decodeCmsBundle(value: unknown) {
 }
 
 async function readCmsBundle() {
+  const bundlePath = resolveCmsBundlePath()
+
+  if (isLocalCmsBundle() && bundlePath && existsSync(bundlePath)) {
+    return readFileSync(bundlePath, 'utf-8')
+  }
+
   try {
     const storage = useStorage('assets:gitbase-cms')
     const fromItem = decodeCmsBundle(await storage.getItem('gitbase-cms.js'))
@@ -49,10 +55,8 @@ async function readCmsBundle() {
       return fromItem
     }
   } catch {
-    // Dev / Node: fall through to filesystem resolve from the npm package
+    // Dev / Node: fall through to the npm package on disk
   }
-
-  const bundlePath = resolveCmsBundlePath()
 
   if (!bundlePath || !existsSync(bundlePath)) {
     return null
@@ -191,6 +195,24 @@ async function verifyGoogleIdToken(credential: string, clientId: string) {
   return email
 }
 
+async function isAllowedCmsEmail(event: H3Event, config: GitbaseEnv, email: string) {
+  if (config.allowedEmails.includes(email)) {
+    return true
+  }
+
+  const database = await getMembersDatabase(event)
+
+  if (!database) {
+    return false
+  }
+
+  try {
+    return await isCmsMember(database, email)
+  } catch {
+    return false
+  }
+}
+
 function timingSafeEqual(a: string, b: string) {
   if (a.length !== b.length) {
     return false
@@ -256,6 +278,16 @@ async function requireCmsAuth(event: H3Event, config: GitbaseEnv) {
   }
 
   return token
+}
+
+async function requireMembersAuth(event: H3Event, config: GitbaseEnv) {
+  const authorization = getRequestHeader(event, 'authorization')
+
+  if (import.meta.dev && !authorization?.startsWith('Bearer ')) {
+    return
+  }
+
+  await requireCmsAuth(event, config)
 }
 
 function loadBaseConfig() {
@@ -408,7 +440,7 @@ export async function handleGitbaseAdminRoute(event: H3Event, slug: string) {
     }
 
     setHeader(event, 'content-type', 'application/javascript; charset=utf-8')
-    setHeader(event, 'cache-control', 'public, max-age=3600')
+    setHeader(event, 'cache-control', isLocalCmsBundle() ? 'no-store' : 'public, max-age=3600')
     return bundle
   }
 
@@ -441,11 +473,59 @@ export async function handleGitbaseAdminRoute(event: H3Event, slug: string) {
     const credential = typeof body?.credential === 'string' ? body.credential : ''
     const email = await verifyGoogleIdToken(credential, config.googleClientId)
 
-    if (!config.allowedEmails.includes(email)) {
+    if (!(await isAllowedCmsEmail(event, config, email))) {
       throw createError({ statusCode: 403, statusMessage: 'You are not allowed to access this CMS' })
     }
 
     return { token: config.githubPat.trim() }
+  }
+
+  if (path === 'cms/members' && (method === 'GET' || method === 'POST' || method === 'DELETE')) {
+    await requireMembersAuth(event, config)
+
+    const database = await getMembersDatabase(event)
+
+    if (!database) {
+      throw createError({ statusCode: 503, statusMessage: 'D1 binding DB is not configured' })
+    }
+
+    if (method === 'GET') {
+      setHeader(event, 'cache-control', 'no-store')
+
+      return {
+        owners: config.allowedEmails,
+        members: await listCmsMembers(database)
+      }
+    }
+
+    const body = await readBody(event)
+    const email = normalizeMemberEmail(body?.email)
+
+    if (!isMemberEmail(email)) {
+      throw createError({ statusCode: 400, statusMessage: 'Enter a valid email address' })
+    }
+
+    if (config.allowedEmails.includes(email)) {
+      throw createError({ statusCode: 409, statusMessage: 'This email is already an owner' })
+    }
+
+    if (method === 'POST') {
+      const added = await addCmsMember(database, email)
+
+      if (!added) {
+        throw createError({ statusCode: 409, statusMessage: 'This email is already an admin' })
+      }
+
+      return { ok: true }
+    }
+
+    const removed = await removeCmsMember(database, email)
+
+    if (!removed) {
+      throw createError({ statusCode: 404, statusMessage: 'This email is not an admin' })
+    }
+
+    return { ok: true }
   }
 
   if (path === 'cms/bootstrap' && method === 'GET') {

@@ -41,6 +41,8 @@ pnpm dev
 
 The admin UI comes from the `@gitbase/cms` dependency (served at `/admin/gitbase-cms.js`).
 
+To try a local `gitbase-cms` checkout before publishing, put that repo next to this one and run `pnpm cms:local`. That builds `dist/gitbase-cms.js` and sets `GITBASE_CMS_LOCAL` in your gitignored `.env`. Everyone else leaves that variable unset and keeps the npm package. Do not add it to Cloudflare secrets.
+
 Open [http://localhost:3000](http://localhost:3000) for the site and [http://localhost:3000/admin](http://localhost:3000/admin) for the CMS.
 
 ## Configuration

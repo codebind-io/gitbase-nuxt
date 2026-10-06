@@ -8,4 +8,4 @@ allowBuilds:
   unrs-resolver: false
   vue-demi: false
 minimumReleaseAgeExclude:
-  - '@gitbase/cms@0.1.0 || 0.1.3'
+  - '@gitbase/cms@0.1.0 || 0.1.3 || 0.1.4'
