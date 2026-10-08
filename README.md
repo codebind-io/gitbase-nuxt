@@ -32,8 +32,8 @@ This repository is the open-source starter: a production-ready Nuxt site with th
 ## Quick start
 
 ```bash
-git clone git@github.com:codebind-io/gitbase-nuxt.git
-cd gitbase-nuxt
+git clone git@github.com:codebind-io/gitbase.git
+cd gitbase
 pnpm install
 cp .env.example .env
 pnpm dev
