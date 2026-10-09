@@ -36,12 +36,21 @@ function toggleFab() {
 function closeFab() {
   open.value = false
 }
+
+function closeOnScroll() {
+  if (!open.value) return
+  open.value = false
+}
+
+useEventListener(window, 'scroll', closeOnScroll, { capture: true, passive: true })
+useEventListener(window, 'wheel', closeOnScroll, { passive: true })
+useEventListener(window, 'touchmove', closeOnScroll, { passive: true })
 </script>
 
 <template>
   <div
     v-if="showFab"
-    class="pointer-events-none fixed inset-0 z-40"
+    class="pointer-events-none fixed inset-0 z-[60]"
     :class="fabVisibilityClass"
   >
     <Transition
@@ -52,7 +61,7 @@ function closeFab() {
     >
       <div
         v-if="open"
-        class="pointer-events-auto absolute inset-0 bg-black/20"
+        class="pointer-events-auto absolute inset-0 backdrop-blur-lg"
         aria-hidden="true"
         @click="closeFab"
       />
