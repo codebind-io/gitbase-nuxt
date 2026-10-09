@@ -31,7 +31,7 @@ defineOgImage('Default', { title, description })
 
       <div
         v-if="posts?.length"
-        class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        class="card-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <Appear
           v-for="(post, index) in posts"

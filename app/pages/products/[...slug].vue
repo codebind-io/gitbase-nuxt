@@ -179,7 +179,7 @@ const checkoutUrl = computed(() => product.value?.checkout_url?.trim() || '')
               More in {{ categoryLabel }}
             </h2>
           </Appear>
-          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="card-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Appear
               v-for="(related, index) in relatedProducts"
               :key="related.path"

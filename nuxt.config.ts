@@ -184,11 +184,6 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  alias: {
-    'minimark/hast': resolveInstalled('@nuxt/content', 'minimark/hast'),
-    'remark-mdc': resolveInstalled('@nuxtjs/mdc/runtime', 'remark-mdc')
-  },
-
   content: {
     database: {
       type: 'd1',
@@ -197,6 +192,11 @@ export default defineNuxtConfig({
     experimental: {
       sqliteConnector: contentSqliteConnector()
     }
+  },
+
+  alias: {
+    'minimark/hast': resolveInstalled('@nuxt/content', 'minimark/hast'),
+    'remark-mdc': resolveInstalled('@nuxtjs/mdc/runtime', 'remark-mdc')
   },
 
   routeRules: {

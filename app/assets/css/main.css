@@ -26,3 +26,28 @@ body {
   color: #ffffff;
   background-color: #474747;
 }
+
+.card-focus {
+  box-shadow: 0 8px 12px rgb(0 0 0 / 0.22);
+}
+
+.dark .card-focus {
+  box-shadow: 0 10px 14px rgb(0 0 0 / 0.9);
+}
+
+.card-grid .card-focus {
+  transition: filter 280ms ease, transform 280ms ease, box-shadow 280ms ease;
+}
+
+.card-grid:has(.card-focus:hover) .card-focus:not(:hover) {
+  filter: blur(2px);
+}
+
+.card-grid .card-focus:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 24px rgb(0 0 0 / 0.38);
+}
+
+.dark .card-grid .card-focus:hover {
+  box-shadow: 0 20px 30px rgb(0 0 0 / 1);
+}

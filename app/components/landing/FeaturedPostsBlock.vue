@@ -77,7 +77,7 @@ function loadMore() {
 
     <div
       v-if="visibleGridPosts.length"
-      class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      class="card-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
       <PostsPostCard
         v-for="post in visibleGridPosts"

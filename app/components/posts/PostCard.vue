@@ -32,9 +32,9 @@ const timeAgo = computed(() => {
 </script>
 
 <template>
-  <div class="group relative flex h-full flex-col overflow-hidden rounded-2xl">
+  <div class="card-focus group relative flex h-full flex-col rounded-2xl">
     <span
-      class="pointer-events-none absolute inset-0 origin-top scale-y-0 rounded-2xl bg-primary/10 transition-transform duration-300 ease-out group-hover:scale-y-100 dark:bg-white/10"
+      class="pointer-events-none absolute inset-0 z-20 origin-top scale-y-0 rounded-2xl bg-primary/10 transition-transform duration-300 ease-out group-hover:scale-y-100 dark:bg-white/10"
       aria-hidden="true"
     />
 
@@ -42,7 +42,7 @@ const timeAgo = computed(() => {
       :to="post.path"
       class="relative flex flex-1 flex-col"
     >
-      <div class="relative aspect-4/3 w-full overflow-hidden">
+      <div class="relative aspect-4/3 w-full overflow-hidden rounded-t-2xl">
         <NuxtImg
           v-if="post.image"
           :src="post.image"
