@@ -45,12 +45,12 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
     { key: 'theme-color', name: 'theme-color', content: color }
   ],
-  link: computed(() => [
-    { key: 'favicon', rel: 'icon', href: favicon.value },
-    ...(themeFontHref.value
-      ? [{ key: 'theme-font', rel: 'stylesheet', href: themeFontHref.value }]
-      : [])
-  ]),
+  link: [
+    computed(() => ({ key: 'favicon', rel: 'icon' as const, href: favicon.value })),
+    computed(() => themeFontHref.value
+      ? { key: 'theme-font', rel: 'stylesheet' as const, href: themeFontHref.value }
+      : undefined)
+  ],
   htmlAttrs: {
     lang: 'fr',
     style: themeStyle
@@ -59,25 +59,15 @@ useHead({
 
 useSeoMeta({
   titleTemplate: '%s',
-  twitterCard: 'summary_large_image',
-  keywords: computed(() => settings.value?.seo?.keywords?.join(', '))
+  twitterCard: 'summary_large_image'
 })
 
+useKeywords(() => settings.value?.seo?.keywords?.join(', '))
+
 const [{ data: navigation }, { data: files }] = await Promise.all([
-  useAsyncData('navigation', () => {
-    return Promise.all([
-      queryOnlinePostsNavigation()
-    ])
-  }, {
-    transform: data => data.flat()
-  }),
-  useLazyAsyncData('search', () => {
-    return Promise.all([
-      queryOnlinePostsSearchSections()
-    ])
-  }, {
-    server: false,
-    transform: data => data.flat()
+  useAsyncData('navigation', () => queryOnlinePostsNavigation()),
+  useLazyAsyncData('search', () => queryOnlinePostsSearchSections(), {
+    server: false
   })
 ])
 </script>

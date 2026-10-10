@@ -1,6 +1,6 @@
 visible: true
 title: GitBase Demo
-description: A Git-based CMS for Nuxt. Edit content in the console, commit to GitHub, and deploy to the Cloudflare edge — no database required.
+description: A Git-based CMS for Nuxt. Edit content in the console, commit to GitHub, and deploy to the Cloudflare edge
 cta:
   label: Visit store
   url: /products

@@ -46,7 +46,7 @@ const timeAgo = computed(() => {
     >
 
     <div
-      class="absolute inset-0 bg-linear-to-t from-black/80 via-black/35 to-black/10 transition-colors duration-300 group-hover:from-black/90 group-hover:via-black/70 group-hover:to-black/45"
+      class="absolute inset-0 bg-linear-to-t from-black/80 via-black/35 to-black/10"
     />
 
     <div

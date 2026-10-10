@@ -202,7 +202,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (body.first) {
-    return await query.first()
+    return (await query.first()) ?? null
   }
 
   return await query.all()

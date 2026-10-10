@@ -23,14 +23,14 @@ const props = defineProps<{
   postCategories: PostCategory[]
 }>()
 
-const showSimpleHero = computed(() => props.simpleHero?.visible !== false)
-const showSimpleBlock = computed(() => props.simpleBlock?.visible !== false)
-const showCarousel = computed(() => props.carousel?.visible !== false)
+const showSimpleHero = computed(() => !!props.simpleHero && props.simpleHero.visible !== false)
+const showSimpleBlock = computed(() => !!props.simpleBlock && props.simpleBlock.visible !== false)
+const showCarousel = computed(() => !!props.carousel && props.carousel.visible !== false)
 const carouselImages = computed(() =>
   (props.carousel?.images ?? []).filter(item => item.image)
 )
-const showFeaturedProducts = computed(() => props.featuredProducts?.visible !== false)
-const showFeaturedPosts = computed(() => props.featuredPosts?.visible !== false)
+const showFeaturedProducts = computed(() => !!props.featuredProducts && props.featuredProducts.visible !== false)
+const showFeaturedPosts = computed(() => !!props.featuredPosts && props.featuredPosts.visible !== false)
 
 const logoSrc = useSiteLogo()
 

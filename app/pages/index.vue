@@ -39,7 +39,7 @@ const hasHomepageContent = [
   carousel.value,
   featuredProducts.value,
   featuredPosts.value
-].some(block => block?.visible !== false)
+].some(block => !!block && block.visible !== false)
 
 if (!hasHomepageContent) {
   throw createError({
@@ -60,9 +60,10 @@ useSeoMeta({
   ogTitle: seoTitle,
   description: seoData?.description || simpleHeroForSeo?.description,
   ogDescription: seoDescription,
-  ogImage: seoData?.og_image || undefined,
-  keywords: seoData?.keywords?.join(', ')
+  ogImage: seoData?.og_image || undefined
 })
+
+useKeywords(seoData?.keywords?.join(', '))
 
 defineOgImage('Default', { title: seoTitle, description: seoDescription })
 </script>

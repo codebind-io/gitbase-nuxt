@@ -12,15 +12,15 @@ const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
 
 const title = page.value?.seo?.title || page.value?.title
 const description = page.value?.seo?.description || page.value?.description
-const keywords = page.value?.tags?.join(', ')
 
 useSeoMeta({
   title,
   description,
   ogDescription: description,
-  ogTitle: title,
-  keywords
+  ogTitle: title
 })
+
+useKeywords(page.value?.tags?.join(', '))
 
 if (page.value.image) {
   useSeoMeta({ ogImage: page.value.image })
@@ -32,7 +32,8 @@ if (page.value.image) {
   })
 }
 
-const articleLink = computed(() => `${window?.location}`)
+const requestUrl = useRequestURL()
+const articleLink = computed(() => requestUrl.href)
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {

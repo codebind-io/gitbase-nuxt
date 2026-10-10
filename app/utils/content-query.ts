@@ -18,9 +18,15 @@ export type ContentQuery = {
   fields?: string[]
 }
 
-export function queryContent<T>(query: ContentQuery) {
-  return $fetch<T>('/api/content/query', {
+export async function queryContent<T>(query: ContentQuery) {
+  const result = await $fetch<T>('/api/content/query', {
     method: 'POST',
     body: query
   })
+
+  if (result !== undefined) {
+    return result
+  }
+
+  return (query.first ? null : []) as T
 }

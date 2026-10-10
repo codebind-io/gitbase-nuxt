@@ -55,6 +55,16 @@ function resolveInstalled(packageName: string, specifier: string) {
   return createRequire(entry).resolve(specifier)
 }
 
+function contentSqliteConnector(): 'better-sqlite3' | 'native' {
+  const major = Number(process.versions.node.split('.')[0])
+
+  // db0's better-sqlite3 connector is async. Nuxt Content deletes a dev-cache
+  // row and inserts it again without awaiting the delete, so those overlap and
+  // the insert hits UNIQUE constraint on _development_cache.id. node:sqlite
+  // runs that delete synchronously. Node 22.5+ has it.
+  return major >= 22 ? 'native' : 'better-sqlite3'
+}
+
 function toCloudflareRoutePath(fileName: string) {
   if (fileName.endsWith('.html')) {
     const base = fileName.slice(0, -5)
@@ -156,14 +166,6 @@ function fixCloudflareRoutes(distDir = join(process.cwd(), 'dist')) {
   }
 
   console.log(`[fix-cloudflare-routes] Wrote ${exclude.length} exclude rules.`)
-}
-
-function contentSqliteConnector(): 'better-sqlite3' | 'native' {
-  const major = Number(process.versions.node.split('.')[0])
-
-  // better-sqlite3 12 aborts on Node 24+ when a Statement is finalized.
-  // Older Node keeps that connector. node:sqlite is available from 22.5.
-  return major >= 24 ? 'native' : 'better-sqlite3'
 }
 
 // https://nuxt.com/docs/api/configuration/nuxt-config

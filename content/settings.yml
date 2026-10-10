@@ -10,7 +10,7 @@ theme:
   custom_color: ''
   primary_dark: lime
   custom_color_dark: ''
-  neutral: mauve
+  neutral: gray
   radius: 0.25
   font: public-sans
 seo:

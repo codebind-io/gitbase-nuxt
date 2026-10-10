@@ -1,10 +1,11 @@
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import type { SQLInputValue } from 'node:sqlite'
 
 import type { H3Event } from 'h3'
 
 type MembersStatement = {
-  bind: (...values: unknown[]) => MembersStatement
+  bind: (...values: SQLInputValue[]) => MembersStatement
   all: <T>() => Promise<{ results?: T[] }>
   first: <T>() => Promise<T | null>
   run: () => Promise<unknown>
@@ -40,10 +41,10 @@ async function openLocalMembersDatabase() {
   localMembersDatabase = {
     prepare(sql: string) {
       const statement = database.prepare(sql)
-      let values: unknown[] = []
+      let values: SQLInputValue[] = []
 
       const bound = {
-        bind(...next: unknown[]) {
+        bind(...next: SQLInputValue[]) {
           values = next
           return bound
         },

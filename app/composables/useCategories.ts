@@ -8,36 +8,42 @@ export function resolveCategoryPath(slug: string | string[] | undefined): string
   return Array.isArray(slug) ? slug.join('/') : slug
 }
 
-async function loadCategories() {
-  return queryContent<CategoriesCollectionItem | null>({ collection: 'categories', first: true })
+function useCategories() {
+  return useAsyncData('categories', () =>
+    queryContent<CategoriesCollectionItem | null>({ collection: 'categories', first: true })
+  )
 }
 
-export function useShopCategories() {
-  return useAsyncData('shop-categories', async () => {
-    const categories = await loadCategories()
-    return categories?.shop_categories ?? []
-  })
+export async function useShopCategories() {
+  const { data } = await useCategories()
+
+  return {
+    data: computed(() => data.value?.shop_categories ?? [])
+  }
 }
 
-export function usePostCategories() {
-  return useAsyncData('post-categories', async () => {
-    const categories = await loadCategories()
-    return categories?.blog_categories ?? []
-  })
+export async function usePostCategories() {
+  const { data } = await useCategories()
+
+  return {
+    data: computed(() => data.value?.blog_categories ?? [])
+  }
 }
 
-export function useShopCategoryBySlug(path: string) {
-  return useAsyncData(`shop-category-${path}`, async () => {
-    const categories = await loadCategories()
-    return categories?.shop_categories?.find(c => c.slug === path) ?? null
-  })
+export async function useShopCategoryBySlug(path: string) {
+  const { data } = await useCategories()
+
+  return {
+    data: computed(() => data.value?.shop_categories?.find(c => c.slug === path) ?? null)
+  }
 }
 
-export function usePostCategoryBySlug(path: string) {
-  return useAsyncData(`post-category-${path}`, async () => {
-    const categories = await loadCategories()
-    return categories?.blog_categories?.find(c => c.slug === path) ?? null
-  })
+export async function usePostCategoryBySlug(path: string) {
+  const { data } = await useCategories()
+
+  return {
+    data: computed(() => data.value?.blog_categories?.find(c => c.slug === path) ?? null)
+  }
 }
 
 export function categoryTitle(

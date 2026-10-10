@@ -33,11 +33,6 @@ const timeAgo = computed(() => {
 
 <template>
   <div class="card-focus group relative flex h-full flex-col rounded-2xl">
-    <span
-      class="pointer-events-none absolute inset-0 z-20 origin-top scale-y-0 rounded-2xl bg-primary/10 transition-transform duration-300 ease-out group-hover:scale-y-100 dark:bg-white/10"
-      aria-hidden="true"
-    />
-
     <NuxtLink
       :to="post.path"
       class="relative flex flex-1 flex-col"

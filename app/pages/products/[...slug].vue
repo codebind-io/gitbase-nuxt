@@ -35,15 +35,16 @@ const categoryLabel = computed(() =>
 
 const title = page.seo?.title || page.title
 const description = page.seo?.description || page.description
-const keywords = page.tags?.join(', ')
+const priceLabel = computed(() => formatPrice(page.price))
 
 useSeoMeta({
   title,
   description,
   ogDescription: description,
-  ogTitle: title,
-  keywords
+  ogTitle: title
 })
+
+useKeywords(page.tags?.join(', '))
 
 if (page.image) {
   useSeoMeta({ ogImage: page.image })
@@ -98,10 +99,10 @@ const checkoutUrl = computed(() => product.value?.checkout_url?.trim() || '')
                       variant="subtle"
                     />
                     <span
-                      v-if="formatPrice(page.price)"
+                      v-if="priceLabel"
                       class="text-lg font-semibold text-primary"
                     >
-                      {{ formatPrice(page.price) }}
+                      {{ priceLabel }}
                     </span>
                   </div>
 
